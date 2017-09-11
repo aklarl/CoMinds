@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc 
+        	access="private" 
+        	author="true" 
+        	classpath="C:\Studium\Workspace\classes_0.8.5\bin" 
+        	destdir="doc" 
+        	nodeprecated="false"
+        	nodeprecatedlist="false" 
+        	noindex="false" 
+        	nonavbar="false" 
+        	notree="false" 
+        	packagenames="common.exceptions,linefollower.simpleWithButtonListener,common.communication,remote.compasscontroller,common.extendedClasses,common.classes,calibrate,common.classes.exceptions,linefollower.pid,common.logger,common,linefollower.simple,common.communication.exceptions" 
+        	source="1.6" 
+    		sourcefiles="src/TextBoxTest.java,src/BTSender.java,src/BTReceiver.java,src/HelloWorldThread.java,src/ThreadTest.java" 
+        	sourcepath="src" 
+        	splitindex="true" 
+        	use="true" 
+    		version="true"/>
+    </target>
+</project>

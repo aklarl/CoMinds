@@ -1,0 +1,138 @@
+<project name="mindstorm" default="uploadandrun">
+	<description>
+    	LineFollower Build File
+    </description>
+
+	<!-- set properties for this build -->
+	<property environment="env" />
+	<property file="build.heading.pid.properties" />
+	<property name="binary" value="${build}/${mainclass}.nxj" />
+
+	<target name="cleanLib" description="clean up all generated files for lib" if="withLib">
+		<delete dir="${lib}" />
+	</target>
+
+	<target name="compileLib" depends="cleanLib" if="withLib">
+		<!-- Compile the java code from ${lib.basedir} to ${lib.build}  -->
+		<mkdir dir="${lib.build}" />
+		<mkdir dir="${lib.build}/nirvana" />
+		<javac srcdir="${lib.current}" includes="${lib.includes}" destdir="${lib.build}">
+			<!--
+  			All that is need to kick any class from Sun's JDK out of the classpath.
+  			Check the search paths using verbose="true" that they really don't contain
+  			anything from the JDK, Ant, etc.
+  			There doesn't seem to be a clean way of having an empty (boot)classpath.
+  			javac keeps adding "." or even worse "" to the path. So i'm adding the
+  			nirvana path to the classpath. 
+  			-->
+			<bootclasspath>
+				<pathelement location="${lib.build}/nirvana" />
+			</bootclasspath>
+			<compilerarg value="-extdirs" />
+			<compilerarg path="${lib.build}/nirvana" />
+		</javac>
+		<delete dir="${lib.build}/nirvana" />
+	</target>
+
+	<target name="jarLib" description="jar all classes from leJOS" depends="compileLib" if="withLib">
+		<jar basedir="${lib.build}" destfile="${lib.jar}" />
+	</target>
+
+	<!-- deletes generated files -->
+	<target name="clean" description="clean up all generated files">
+		<delete dir="${build}" />
+	</target>
+
+	<target name="compile" depends="clean, jarLib" description="compile the source ">
+		<!-- Compile the java code from ${src} to ${build}  -->
+		<mkdir dir="${build}" />
+		<javac srcdir="${src}" includes="${includes}" excludes="${excludes}" destdir="${build}">
+			<bootclasspath>
+				<pathelement location="${lib.jar}" />
+			</bootclasspath>
+		</javac>
+	</target>
+
+	<target name="link" depends="compile" description="link the binary">
+
+		<!-- Link the binary and create a signature file -->
+		<java classname="js.tinyvm.TinyVM">
+			<arg value="--bootclasspath" />
+			<arg path="${lib.jar}" />
+			<arg value="--classpath" />
+			<arg path="${build}" />
+			<arg value="--writeorder" />
+			<arg value="LE" />
+			<arg value="${mainclass}" />
+			<arg value="-o" />
+			<arg value="${binary}" />
+			<arg value="-v" />
+			<classpath>
+				<pathelement location="${nxj.jtools.jar}" />
+				<pathelement location="${nxj.commons.jar}" />
+				<pathelement location="${nxj.bcel.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="upload" depends="link" description="upload the binary">
+		<java classname="lejos.pc.tools.NXJUpload" fork="true">
+			<jvmarg value="-Djava.library.path=${nxj.library.path}" />
+			<jvmarg value="-Dnxj.home=${nxj.home}" />
+			<arg value="${binary}" />
+			<classpath>
+				<pathelement location="${nxj.jtools.jar}" />
+				<pathelement location="${nxj.pctools.jar}" />
+				<pathelement location="${nxj.pccomm.jar}" />
+				<pathelement location="${nxj.commons.jar}" />
+				<pathelement location="${nxj.bcel.jar}" />
+				<pathelement location="${nxj.bluecove.jar}" />
+				<pathelement location="${nxj.bluecove-gpl.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="uploadandrun" depends="link" description="upload and run the binary">
+		<java classname="lejos.pc.tools.NXJUpload" fork="true">
+			<jvmarg value="-Djava.library.path=${nxj.library.path}" />
+			<jvmarg value="-Dnxj.home=${nxj.home}" />
+			<arg value="${binary}" />
+			<arg value="-r" />
+			<classpath>
+				<pathelement location="${nxj.jtools.jar}" />
+				<pathelement location="${nxj.pctools.jar}" />
+				<pathelement location="${nxj.pccomm.jar}" />
+				<pathelement location="${nxj.commons.jar}" />
+				<pathelement location="${nxj.bcel.jar}" />
+				<pathelement location="${nxj.bluecove.jar}" />
+				<pathelement location="${nxj.bluecove-gpl.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="setWithLib">
+		<property name="withLibProp" value="set" />
+		<condition property="withLib">
+			<isset property="withLibProp" />
+		</condition>
+	</target>
+
+	<target name="uploadandrunWithLib" depends="setWithLib, link" description="compile lib and upload and run the binary">
+		<java classname="lejos.pc.tools.NXJUpload" fork="true">
+			<jvmarg value="-Djava.library.path=${nxj.library.path}" />
+			<jvmarg value="-Dnxj.home=${nxj.home}" />
+			<arg value="${binary}" />
+			<arg value="-r" />
+			<classpath>
+				<pathelement location="${nxj.jtools.jar}" />
+				<pathelement location="${nxj.pctools.jar}" />
+				<pathelement location="${nxj.pccomm.jar}" />
+				<pathelement location="${nxj.commons.jar}" />
+				<pathelement location="${nxj.bcel.jar}" />
+				<pathelement location="${nxj.bluecove.jar}" />
+				<pathelement location="${nxj.bluecove-gpl.jar}" />
+			</classpath>
+		</java>
+	</target>
+
+</project>
